@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import './App.css';
 import Searchbar from './Components/Searchbar';
@@ -25,6 +27,7 @@ function App() {
         page={page}
         onClick={onClickButtomLoadMore}
       />
+      <ToastContainer />
     </div>
   );
 }

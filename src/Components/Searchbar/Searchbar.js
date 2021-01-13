@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { toast } from 'react-toastify';
 import s from './Searchbar.module.css';
 
 function Searchbar({ onSubmit }) {
@@ -13,8 +14,15 @@ function Searchbar({ onSubmit }) {
     event.preventDefault();
 
     if (value === '') {
-      //toast.error('Введите строку запроса.');
-      console.log('Введите строку запроса.');
+      toast.error('Введите строку запроса.', {
+        position: 'top-right',
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
       return;
     }
 
