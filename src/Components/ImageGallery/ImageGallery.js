@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import fetchPhoto from '../../Service/apiService';
@@ -16,93 +16,80 @@ const Status = {
 };
 const bigImage = { alt: '', src: '' };
 
-class ImageGallery extends Component {
-  constructor() {
-    super();
-    this.state = { images: [], status: '', error: null, showModal: false };
-  }
+function ImageGallery({ queryString, page, onClick }) {
+  const [images, setImages] = useState([]);
+  const [status, setStatus] = useState('');
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevQueryString = prevProps.queryString;
-    const nextQueryString = this.props.queryString;
+  useEffect(() => {
+    const getPhoto = (nextQueryString, nextPage) => {
+      fetchPhoto(nextQueryString, nextPage)
+        .then(data => {
+          const arrayImages = [];
+          if (data.hits.length === 0) {
+            return Promise.reject(new Error(`Данных для отображения нет`));
+          }
 
-    const prevPage = prevProps.page;
-    const nextPage = this.props.page;
+          data.hits.forEach(element => {
+            const { id, webformatURL, largeImageURL, tags } = element;
+            arrayImages.push({ id, webformatURL, largeImageURL, tags });
+          });
+          return arrayImages;
+        })
+        .then(arrayImages => {
+          setImages(prevImages => [...prevImages, ...arrayImages]);
+          setStatus(Status.RESOLVED);
 
-    if (prevQueryString !== nextQueryString || prevPage !== nextPage) {
-      this.setState({ status: Status.PENDING });
+          window.scrollTo({
+            top: document.documentElement.scrollHeight,
+            behavior: 'smooth',
+          });
+        })
+        .catch(error => {
+          setError(error);
+          setStatus(Status.REJECTED);
+        });
+    };
 
-      this.getPhoto(prevQueryString, nextQueryString, nextPage);
+    if (!queryString || !page) {
+      return;
     }
-  }
+    setStatus(Status.PENDING);
+    getPhoto(queryString, page);
+  }, [queryString, page]);
 
-  getPhoto(prevQueryString, nextQueryString, nextPage) {
-    fetchPhoto(nextQueryString, nextPage)
-      .then(data => {
-        const arrayImages = [];
-        if (data.hits.length === 0) {
-          return Promise.reject(new Error(`Данных для отображения нет`));
-        }
-
-        data.hits.forEach(element => {
-          const { id, webformatURL, largeImageURL, tags } = element;
-          arrayImages.push({ id, webformatURL, largeImageURL, tags });
-        });
-        return arrayImages;
-      })
-      .then(arrayImages => {
-        let newArrayImage;
-        if (prevQueryString === nextQueryString) {
-          newArrayImage = [...this.state.images, ...arrayImages];
-        } else {
-          newArrayImage = [...arrayImages];
-        }
-
-        this.setState({ images: newArrayImage, status: Status.RESOLVED });
-
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: 'smooth',
-        });
-      })
-      .catch(error => this.setState({ error, status: Status.REJECTED }));
-  }
-
-  toggleModal = () => {
-    this.setState(({ showModal }) => ({ showModal: !showModal }));
+  const toggleModal = () => {
+    setShowModal(prevShowModal => !prevShowModal);
   };
 
-  onClickImage = event => {
+  const onClickImage = event => {
     bigImage.alt = event.target.alt;
     bigImage.src = event.target.dataset.big_img;
-    this.toggleModal();
+    toggleModal();
   };
 
-  render() {
-    const { images, status, error, showModal } = this.state;
-
-    if (status === status.REJECTED) {
-      return <h1>{error.message}</h1>;
-    }
-
-    return (
-      <>
-        <ul className={s.ImageGallery}>
-          <ImageGalleryItem images={images} onClickImage={this.onClickImage} />
-        </ul>
-
-        {status === status.RESOLVED && <Button onClick={this.props.onClick} />}
-
-        {status === status.PENDING && <Loader />}
-
-        {showModal && (
-          <Modal onClose={this.toggleModal}>
-            <img src={bigImage.src} alt={bigImage.alt} />
-          </Modal>
-        )}
-      </>
-    );
+  if (status === Status.REJECTED) {
+    return <h1>{error.message}</h1>;
   }
+
+  return (
+    <>
+      <ul className={s.ImageGallery}>
+        <ImageGalleryItem images={images} onClickImage={onClickImage} />
+      </ul>
+
+      {status === Status.RESOLVED && <Button onClick={onClick} />}
+
+      {status === Status.PENDING && <Loader />}
+
+      {showModal && (
+        <Modal onClose={toggleModal}>
+          <img src={bigImage.src} alt={bigImage.alt} />
+        </Modal>
+      )}
+    </>
+  );
 }
 
 ImageGallery.propTypes = {

@@ -1,37 +1,32 @@
-import { Component } from 'react';
+import { useState } from 'react';
 
 import './App.css';
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = { page: 0, queryString: '' };
-  }
+function App() {
+  const [page, setPage] = useState(0);
+  const [queryString, setQueryString] = useState('');
 
-  onSubmit = values => {
-    this.setState({ page: 1, queryString: values });
+  const onSubmit = values => {
+    setPage(1);
+    setQueryString(values);
   };
 
-  onClickButtomLoadMore = event => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const onClickButtomLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  render() {
-    const { queryString, page } = this.state;
-
-    return (
-      <div className="App">
-        <Searchbar onSubmit={this.onSubmit} />
-        <ImageGallery
-          queryString={queryString}
-          page={page}
-          onClick={this.onClickButtomLoadMore}
-        />
-      </div>
-    );
-  }
+  return (
+    <div className="App">
+      <Searchbar onSubmit={onSubmit} />
+      <ImageGallery
+        queryString={queryString}
+        page={page}
+        onClick={onClickButtomLoadMore}
+      />
+    </div>
+  );
 }
 
 export default App;
