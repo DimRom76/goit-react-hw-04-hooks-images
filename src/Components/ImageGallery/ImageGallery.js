@@ -6,18 +6,20 @@ import Modal from '../Modal/';
 
 import s from './ImageGallery.module.css';
 
-const bigImage = { alt: '', src: '' };
+const bigImageInit = { alt: '', src: '' };
 
 function ImageGallery({ images }) {
   const [showModal, setShowModal] = useState(false);
+  const [bigImage, setBigImage] = useState(bigImageInit);
 
   const toggleModal = () => {
+    if (showModal) setBigImage(bigImageInit);
     setShowModal(prevShowModal => !prevShowModal);
   };
 
   const onClickImage = event => {
-    bigImage.alt = event.target.alt;
-    bigImage.src = event.target.dataset.big_img;
+    setBigImage({ alt: event.target.alt, src: event.target.dataset.big_img });
+
     toggleModal();
   };
 
