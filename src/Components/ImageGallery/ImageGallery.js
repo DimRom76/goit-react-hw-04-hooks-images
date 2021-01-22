@@ -3,16 +3,12 @@ import PropTypes from 'prop-types';
 
 import ImageGalleryItem from '../ImageGalleryItem';
 import Modal from '../Modal/';
-import Button from '../Button/';
-import Loader from '../Loader/';
-
-import STATUS from '../../Service/apiStatus';
 
 import s from './ImageGallery.module.css';
 
 const bigImage = { alt: '', src: '' };
 
-function ImageGallery({ images, status, onClick, error }) {
+function ImageGallery({ images }) {
   const [showModal, setShowModal] = useState(false);
 
   const toggleModal = () => {
@@ -25,19 +21,11 @@ function ImageGallery({ images, status, onClick, error }) {
     toggleModal();
   };
 
-  if (status === STATUS.REJECTED) {
-    return <h1>{error.message}</h1>;
-  }
-
   return (
     <>
       <ul className={s.ImageGallery}>
         <ImageGalleryItem images={images} onClickImage={onClickImage} />
       </ul>
-
-      {status === STATUS.RESOLVED && <Button onClick={onClick} />}
-
-      {status === STATUS.PENDING && <Loader />}
 
       {showModal && (
         <Modal onClose={toggleModal}>
@@ -49,9 +37,7 @@ function ImageGallery({ images, status, onClick, error }) {
 }
 
 ImageGallery.propTypes = {
-  images: PropTypes.array.isRequired,
-  status: PropTypes.string.isRequired,
-  onClick: PropTypes.func.isRequired,
+  images: PropTypes.array,
 };
 
 export default ImageGallery;

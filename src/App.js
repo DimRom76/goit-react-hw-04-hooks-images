@@ -8,6 +8,8 @@ import STATUS from './Service/apiStatus';
 import './App.css';
 import Searchbar from './Components/Searchbar';
 import ImageGallery from './Components/ImageGallery';
+import Button from './Components/Button/';
+import Loader from './Components/Loader/';
 
 function App() {
   const [error, setError] = useState(null);
@@ -66,12 +68,17 @@ function App() {
   return (
     <div className="App">
       <Searchbar onSubmit={onSubmit} />
-      <ImageGallery
-        status={status}
-        error={error}
-        onClick={onClickButtomLoadMore}
-        images={images}
-      />
+
+      {status === STATUS.REJECTED && <h1>{error.message}</h1>}
+
+      {(status === STATUS.RESOLVED || status === STATUS.PENDING) && (
+        <ImageGallery images={images} />
+      )}
+
+      {status === STATUS.RESOLVED && <Button onClick={onClickButtomLoadMore} />}
+
+      {status === STATUS.PENDING && <Loader />}
+
       <ToastContainer />
     </div>
   );
